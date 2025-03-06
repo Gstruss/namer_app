@@ -1,4 +1,4 @@
-import 'package:english_words/english_words.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,14 +26,36 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  var current = _getRandomSpanishWord();
+
+  static final List<String> _spanishWords = [
+    'perro', 'gato', 'cielo', 'sol', 'luna', 'flor', 'río', 'montaña', 'bosque', 'mar',
+    'estrella', 'noche', 'día', 'madera', 'piedra', 'nieve', 'viento', 'árbol', 'luz', 'agua',
+    'arepa', 'barranquilla', 'café', 'sancocho', 'tinto', 'chiva', 'bambuco', 'vallenato', 'patacón', 'empanada',
+    'moñona', 'bacano', 'chocolate', 'hijo de puta', 'pelado', 'parcero', 'mamerto', 'marica', 'guevón', 'paila',
+    'cuchibarro', 'cucho', 'pucha', 'pique', 'chiquito', 'mamar gallo', 'guayabo', 'sillón', 'cachaco', 'madrugar',
+    'churro', 'viche', 'guandolo', 'guarapo', 'machete', 'tinto', 'palo', 'aguacate', 'alpargata', 'cucaracha',
+    'vibrón', 'trabajo', 'volador', 'finca', 'rolo', 'lucha', 'conchudo', 'quimba', 'salchichón', 'tía', 'coso',
+    'panela', 'rumba', 'marimonda', 'chiquitear', 'romerillo', 'yuca', 'guapetón', 'pupusa', 'trote', 'cañaguate',
+    'chicharrón', 'guerrero', 'alebrijes', 'súper', 'cucho', 'bollo', 'peluquear', 'carretón', 'bici', 'ranchera',
+    'bocadillo', 'mujerón', 'cambuche', 'lavadero', 'mamera', 'guacherna', 'calentura', 'motilón', 'cantaleta',
+    'patrón', 'nochebuena', 'caleta', 'corte', 'pesa', 'boca', 'chisme', 'relajo', 'zancudo', 'calor', 'fondo',
+    'chamba', 'tropel', 'rompecabezas', 'chaleco', 'sastre', 'verde', 'salsito', 'guainía', 'cervecero', 'nene',
+    'fiesta', 'aguacero', 'patá', 'pilla', 'guayaba', 'correr', 'trote', 'sangre', 'mojo', 'güiro', 'despacho'
+];
+
+
+  static String _getRandomSpanishWord() {
+    final random = Random();
+    return _spanishWords[random.nextInt(_spanishWords.length)];
+  }
 
   void getNext() {
-    current = WordPair.random();
+    current = _getRandomSpanishWord();
     notifyListeners();
   }
 
-  var favorites = <WordPair>[];
+  var favorites = <String>[];
 
   void toggleFavorite() {
     if (favorites.contains(current)) {
@@ -43,33 +65,31 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
 }
 
 class MyHomePage extends StatefulWidget {
   var selectedIndex = 0;
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  var selectedIndex = 0;     // ← Add this property.
+  var selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-
     Widget page;
-switch (selectedIndex) {
-  case 0:
-    page = GeneratorPage();
-    break;
-  case 1:
-    page = FavoritesPage();
-    break;
-  default:
-    throw UnimplementedError('no widget for $selectedIndex');
-}
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = FavoritesPage();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -82,21 +102,18 @@ switch (selectedIndex) {
                   destinations: [
                     NavigationRailDestination(
                       icon: Icon(Icons.home),
-                      label: Text('Home'),
+                      label: Text('Inicio'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.favorite),
-                      label: Text('Favorites'),
+                      label: Text('Favoritos'),
                     ),
                   ],
-                  selectedIndex: selectedIndex,    // ← Change to this.
+                  selectedIndex: selectedIndex,
                   onDestinationSelected: (value) {
-        
-                    // ↓ Replace print with this.
                     setState(() {
                       selectedIndex = value;
                     });
-        
                   },
                 ),
               ),
@@ -109,7 +126,7 @@ switch (selectedIndex) {
             ],
           ),
         );
-      }
+      },
     );
   }
 }
@@ -121,7 +138,7 @@ class FavoritesPage extends StatelessWidget {
 
     if (appState.favorites.isEmpty) {
       return Center(
-        child: Text('No favorites yet.'),
+        child: Text('Sin favoritos aún'),
       );
     }
 
@@ -129,13 +146,12 @@ class FavoritesPage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
+          child: Text('Tienes ${appState.favorites.length} en favoritos:'),
         ),
-        for (var pair in appState.favorites)
+        for (var word in appState.favorites)
           ListTile(
             leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
+            title: Text(word),
           ),
       ],
     );
@@ -146,10 +162,10 @@ class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var pair = appState.current;
+    var word = appState.current;
 
     IconData icon;
-    if (appState.favorites.contains(pair)) {
+    if (appState.favorites.contains(word)) {
       icon = Icons.favorite;
     } else {
       icon = Icons.favorite_border;
@@ -159,7 +175,7 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          BigCard(pair: pair),
+          BigCard(word: word),
           SizedBox(height: 10),
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -169,14 +185,14 @@ class GeneratorPage extends StatelessWidget {
                   appState.toggleFavorite();
                 },
                 icon: Icon(icon),
-                label: Text('Like'),
+                label: Text('Me gusta'),
               ),
               SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
                   appState.getNext();
                 },
-                child: Text('Next'),
+                child: Text('Siguiente'),
               ),
             ],
           ),
@@ -189,10 +205,10 @@ class GeneratorPage extends StatelessWidget {
 class BigCard extends StatelessWidget {
   const BigCard({
     super.key,
-    required this.pair,
+    required this.word,
   });
 
-  final WordPair pair;
+  final String word;
 
   @override
   Widget build(BuildContext context) {
@@ -206,12 +222,10 @@ class BigCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
-          pair.asLowerCase,
+          word,
           style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
         ),
       ),
     );
   }
-  
 }
