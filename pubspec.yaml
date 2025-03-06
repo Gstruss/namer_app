@@ -23,3 +23,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependencies:
+  flutter:
+    sdk: flutter
+  list_spanish_words: ^1.0.0  # Asegúrate de usar la versión correcta
