@@ -1,7 +1,6 @@
-import 'dart:math';
+import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:list_spanish_words/list_spanish_words.dart';  // Cambié esto
 
 void main() {
   runApp(MyApp());
@@ -27,23 +26,15 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  // Lista de palabras en español de la librería `list_spanish_words`
-  var current = '';  // Usamos String en lugar de WordPair
+  var current = WordPair.random();
 
-  MyAppState() {
-    getNext();  // Generar la primera palabra aleatoria
-  }
-
-  // Función para obtener una palabra aleatoria de la lista
   void getNext() {
-    final random = Random();
-    current = spanishWords[random.nextInt(spanishWords.length)]; // Selecciona una palabra aleatoria
+    current = WordPair.random();
     notifyListeners();
   }
 
-  var favorites = <String>[];  // Lista de favoritos ahora con String
+  var favorites = <WordPair>[];
 
-  // Función para agregar o eliminar de favoritos
   void toggleFavorite() {
     if (favorites.contains(current)) {
       favorites.remove(current);
@@ -52,31 +43,33 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
+  
 }
 
 class MyHomePage extends StatefulWidget {
   var selectedIndex = 0;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+
+  var selectedIndex = 0;     // ← Add this property.
 
   @override
   Widget build(BuildContext context) {
+
     Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
+switch (selectedIndex) {
+  case 0:
+    page = GeneratorPage();
+    break;
+  case 1:
+    page = FavoritesPage();
+    break;
+  default:
+    throw UnimplementedError('no widget for $selectedIndex');
+}
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -96,11 +89,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       label: Text('Favorites'),
                     ),
                   ],
-                  selectedIndex: selectedIndex,
+                  selectedIndex: selectedIndex,    // ← Change to this.
                   onDestinationSelected: (value) {
+        
+                    // ↓ Replace print with this.
                     setState(() {
                       selectedIndex = value;
                     });
+        
                   },
                 ),
               ),
@@ -113,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         );
-      },
+      }
     );
   }
 }
@@ -133,12 +129,13 @@ class FavoritesPage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(20),
-          child: Text('You have ${appState.favorites.length} favorites:'),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
         ),
-        for (var word in appState.favorites) // Cambié `pair` por `word`
+        for (var pair in appState.favorites)
           ListTile(
             leading: Icon(Icons.favorite),
-            title: Text(word),  // Cambié `pair.asLowerCase` por `word`
+            title: Text(pair.asLowerCase),
           ),
       ],
     );
@@ -149,10 +146,10 @@ class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var word = appState.current;  // Ahora `current` es un String
+    var pair = appState.current;
 
     IconData icon;
-    if (appState.favorites.contains(word)) {
+    if (appState.favorites.contains(pair)) {
       icon = Icons.favorite;
     } else {
       icon = Icons.favorite_border;
@@ -162,7 +159,7 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          BigCard(word: word),
+          BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -192,10 +189,10 @@ class GeneratorPage extends StatelessWidget {
 class BigCard extends StatelessWidget {
   const BigCard({
     super.key,
-    required this.word,  // Ahora `word` es un String
+    required this.pair,
   });
 
-  final String word;  // Cambié `pair` a `word`
+  final WordPair pair;
 
   @override
   Widget build(BuildContext context) {
@@ -209,11 +206,12 @@ class BigCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
-          word,  // Cambié `pair.asLowerCase` por `word`
+          pair.asLowerCase,
           style: style,
-          semanticsLabel: word,  // Cambié `pair.first` y `pair.second` por `word`
+          semanticsLabel: "${pair.first} ${pair.second}",
         ),
       ),
     );
   }
+  
 }
